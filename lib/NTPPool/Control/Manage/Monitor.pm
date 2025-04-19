@@ -85,7 +85,7 @@ sub render_monitor {
     }
     my $data = int_api(
         'get',
-        'monitor/admin/monitor',
+        'monitor/manage/monitor',
         {   name => $name,
             user => $self->plain_cookie($self->user_cookie_name),
         }
@@ -197,11 +197,16 @@ sub render_monitors {
 
     my $data = int_api(
         'get',
-        'monitor/admin/',
+        'monitor/manage/',
         {   account_id => $self->current_account->id,
             user       => $self->plain_cookie($self->user_cookie_name),
         }
     );
+
+    if ($data->{code} >= 400) {
+        $self->tpl_param('error', $data->{error});
+        $self->tpl_param('code', $data->{code});
+    }
 
     my @monitors = _monitor_list($data->{data}->{Monitors} || {});
     $self->tpl_param('monitors', \@monitors);
@@ -220,11 +225,16 @@ sub render_admin_list {
 
     my $data = int_api(
         'get',
-        'monitor/admin/',
+        'monitor/manage/',
         {   all_accounts => 1,
             user         => $self->plain_cookie($self->user_cookie_name),
         }
     );
+
+    if ($data->{code} >= 400) {
+        $self->tpl_param('error', $data->{error});
+        $self->tpl_param('code', $data->{code});
+    }
 
     my @monitors = _monitor_list($data->{data}->{Monitors} || {});
     $self->tpl_param('monitors', \@monitors);
@@ -245,7 +255,7 @@ sub render_admin_status {
 
     my $data = int_api(
         'post',
-        'monitor/admin/status',
+        'monitor/manage/status',
         {   name   => $self->req_param('name')                     || '',
             id     => $self->req_param('id')                       || '',
             status => $self->req_param('status')                   || '',
